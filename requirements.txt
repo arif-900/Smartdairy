@@ -4,3 +4,4 @@ gunicorn
 Werkzeug
 reportlab
 python-dotenv
+twilio
