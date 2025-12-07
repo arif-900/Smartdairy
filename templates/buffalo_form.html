@@ -1,0 +1,88 @@
+{% extends "layout.html" %}
+{% block title %}{{ 'Edit' if buffalo else 'Add' }} Buffalo • SmartDairy{% endblock %}
+
+{% block content %}
+<h2 class="text-xl font-semibold text-slate-800 mb-2">
+  {{ 'Edit Buffalo' if buffalo else 'Add New Buffalo' }}
+</h2>
+
+<form method="post"
+      class="bg-white border border-slate-200 rounded-lg p-4 shadow-sm space-y-3 text-xs">
+  <div class="grid md:grid-cols-2 gap-3">
+    <div>
+      <label class="block font-medium mb-1">Tag / Name *</label>
+      <input type="text" name="tag_name"
+             value="{{ buffalo.tag_name if buffalo else '' }}"
+             required
+             class="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"/>
+    </div>
+    <div>
+      <label class="block font-medium mb-1">Type</label>
+      <select name="animal_type"
+              class="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+        {% set t = buffalo.animal_type if buffalo else 'buffalo' %}
+        <option value="buffalo" {% if t == 'buffalo' %}selected{% endif %}>Buffalo</option>
+        <option value="cow" {% if t == 'cow' %}selected{% endif %}>Cow</option>
+      </select>
+    </div>
+    <div>
+      <label class="block font-medium mb-1">Age</label>
+      <input type="text" name="age"
+             value="{{ buffalo.age if buffalo else '' }}"
+             placeholder="e.g. 3 years"
+             class="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"/>
+    </div>
+    <div>
+      <label class="block font-medium mb-1">Purchase Date</label>
+      <input type="date" name="purchase_date"
+             value="{% if buffalo and buffalo.purchase_date %}{{ buffalo.purchase_date.strftime('%Y-%m-%d') }}{% endif %}"
+             class="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"/>
+    </div>
+    <div>
+      <label class="block font-medium mb-1">Purchase Price (₹)</label>
+      <input type="number" name="purchase_price"
+             value="{{ buffalo.purchase_price if buffalo and buffalo.purchase_price else '' }}"
+             class="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"/>
+    </div>
+    <div>
+      <label class="block font-medium mb-1">Seller Name</label>
+      <input type="text" name="seller_name"
+             value="{{ buffalo.seller_name if buffalo else '' }}"
+             class="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"/>
+    </div>
+    <div>
+      <label class="block font-medium mb-1">Seller Mobile</label>
+      <input type="text" name="seller_mobile"
+             value="{{ buffalo.seller_mobile if buffalo else '' }}"
+             class="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"/>
+    </div>
+    <div>
+      <label class="block font-medium mb-1">Status</label>
+      {% set st = buffalo.status if buffalo else 'active' %}
+      <select name="status"
+              class="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+        <option value="active" {% if st == 'active' %}selected{% endif %}>Active</option>
+        <option value="sold" {% if st == 'sold' %}selected{% endif %}>Sold</option>
+        <option value="dead" {% if st == 'dead' %}selected{% endif %}>Dead</option>
+      </select>
+    </div>
+  </div>
+
+  <div>
+    <label class="block font-medium mb-1">Notes</label>
+    <textarea name="notes" rows="3"
+              class="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">{{ buffalo.notes if buffalo else '' }}</textarea>
+  </div>
+
+  <div class="flex items-center gap-2">
+    <button type="submit"
+            class="rounded-md bg-emerald-600 px-4 py-2 text-xs font-medium text-white hover:bg-emerald-700">
+      Save
+    </button>
+    <a href="{{ url_for('buffalo_list') }}"
+       class="text-xs text-slate-600 hover:underline">
+      Cancel
+    </a>
+  </div>
+</form>
+{% endblock %}

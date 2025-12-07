@@ -1,0 +1,115 @@
+{% extends "layout.html" %}
+{% block title %}Salaries • SmartDairy{% endblock %}
+
+{% block content %}
+<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+  <div>
+    <h2 class="text-xl font-semibold text-slate-800">Salary Payments</h2>
+    <p class="text-xs text-slate-500">
+      Track monthly salary payments to each worker.
+    </p>
+  </div>
+  <a href="{{ url_for('salary_add') }}"
+     class="inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-xs font-medium text-white shadow hover:bg-emerald-700">
+    + Add Payment
+  </a>
+</div>
+
+<form method="get" class="bg-white border border-slate-200 rounded-lg p-3 shadow-sm space-y-3 mt-4">
+  <div class="grid gap-3 md:grid-cols-3 items-end">
+    <div>
+      <label class="block text-xs font-medium text-slate-500 mb-1">Filter by Month</label>
+      <select name="month"
+              class="w-full rounded-md border border-slate-300 px-3 py-2 text-xs outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+        <option value="">All months</option>
+        {% for m in month_values %}
+          <option value="{{ m }}" {% if m == month %}selected{% endif %}>
+            {{ m }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="md:col-span-2 text-[11px] text-slate-500">
+      Format: <code>YYYY-MM</code> (e.g. 2025-12). Choose a month to see only that month’s payments.
+    </div>
+  </div>
+  <div class="flex items-center gap-2 mt-1">
+  <button type="submit" class="...">
+    Apply Filters
+  </button>
+
+  <a href="{{ url_for('salary_list', month=month, download='csv') }}"
+     class="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 no-print">
+    ⬇️ Download CSV
+  </a>
+
+  <button type="button"
+          onclick="window.print()"
+          class="rounded-md border border-emerald-500 px-3 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-50 no-print">
+    🖨 Print / Save as PDF
+  </button>
+</div>
+
+</form>
+
+<div class="bg-white border border-slate-200 rounded-lg shadow-sm mt-4">
+  <div class="overflow-x-auto">
+    <table class="min-w-full text-xs">
+      <thead class="bg-slate-50 border-b border-slate-200">
+        <tr>
+          <th class="px-3 py-2 text-left font-medium text-slate-600">ID</th>
+          <th class="px-3 py-2 text-left font-medium text-slate-600">Worker</th>
+          <th class="px-3 py-2 text-left font-medium text-slate-600">Month</th>
+          <th class="px-3 py-2 text-left font-medium text-slate-600">Amount</th>
+          <th class="px-3 py-2 text-left font-medium text-slate-600">Mode</th>
+          <th class="px-3 py-2 text-left font-medium text-slate-600">Paid On</th>
+          <th class="px-3 py-2 text-left font-medium text-slate-600">Ref / Notes</th>
+          <th class="px-3 py-2 text-right font-medium text-slate-600">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        {% for p in payments %}
+          <tr>
+            <td class="px-3 py-2 text-slate-700">S-{{ p.id }}</td>
+            <td class="px-3 py-2 text-slate-700">
+              {{ p.worker.name if p.worker else 'Worker #' ~ p.worker_id }}
+            </td>
+            <td class="px-3 py-2 text-slate-700">{{ p.month }}</td>
+            <td class="px-3 py-2 text-slate-700">₹ {{ "{:,}".format(p.amount) }}</td>
+            <td class="px-3 py-2 text-slate-700">{{ (p.payment_mode or '')|title }}</td>
+            <td class="px-3 py-2 text-slate-700">
+              {{ p.date_paid.strftime("%d-%m-%Y") }}
+            </td>
+            <td class="px-3 py-2 text-slate-700">
+              {% if p.transaction_ref %}Ref: {{ p.transaction_ref }}{% endif %}
+              {% if p.notes %}
+                <br><span class="text-slate-500">{{ p.notes }}</span>
+              {% endif %}
+            </td>
+            <td class="px-3 py-2 text-right space-x-2">
+              <a href="{{ url_for('salary_edit', payment_id=p.id) }}"
+                 class="text-[11px] text-sky-600 hover:underline">Edit</a>
+
+              <form action="{{ url_for('salary_delete', payment_id=p.id) }}"
+                    method="post" style="display:inline;"
+                    onsubmit="return confirm('Delete this salary record?');">
+                <button type="submit"
+                        class="text-[11px] text-red-600 hover:underline">
+                  Delete
+                </button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+        {% if not payments %}
+          <tr>
+            <td colspan="8" class="px-3 py-3 text-center text-[11px] text-slate-500">
+              No salary payments recorded yet.
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

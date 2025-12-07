@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>{% block title %}SmartDairy{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* -------- Print / PDF styles -------- */
+    @media print {
+
+      /* Remove background colors for clean PDF */
+      body {
+        background: #ffffff !important;
+      }
+
+      /* Hide navbar, sidebar, footer, buttons when printing */
+      header,
+      aside,
+      footer,
+      .no-print {
+        display: none !important;
+      }
+
+      /* Make main content take full width */
+      main {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0;
+        padding: 0;
+      }
+
+      main section {
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+      }
+
+      /* Tables: use full width and clear borders */
+      table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        font-size: 11px;
+      }
+
+      table th,
+      table td {
+        border: 1px solid #e5e7eb !important;
+        padding: 4px 6px !important;
+      }
+    }
+
+    :root {
+      --sd-primary: #059669;   /* emerald-600 */
+      --sd-soft-bg: #f3f4f6;  /* slate-100 */
+    }
+
+    body {
+      background: radial-gradient(circle at top left, #ecfdf5 0, #f3f4f6 40%, #e5e7eb 100%);
+    }
+
+    /* Smooth card hover for all white cards */
+    .card-hover {
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+    .card-hover:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+      border-color: rgba(5, 150, 105, 0.35); /* emerald-ish */
+    }
+
+    /* Table row hover */
+    .table-row-hover tbody tr:hover {
+      background-color: rgba(249, 250, 251, 0.9); /* slate-50 */
+    }
+
+    /* Pills / badges (if you want custom ones) */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.12rem 0.55rem;
+      border-radius: 9999px;
+      font-size: 0.68rem;
+      font-weight: 500;
+    }
+    .badge-soft-green {
+      background-color: #ecfdf5;
+      color: #047857;
+      border: 1px solid #bbf7d0;
+    }
+    .badge-soft-slate {
+      background-color: #f9fafb;
+      color: #4b5563;
+      border: 1px solid #e5e7eb;
+    }
+
+    /* Subtle fade for page content */
+    main section {
+      animation: fadeInUp 0.2s ease-out;
+    }
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Custom scrollbar (desktop) */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5f5;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9ca3af;
+    }
+
+    /* Mobile tweak: small padding around main content */
+    @media (max-width: 767px) {
+      body {
+        background: #f3f4f6;
+      }
+    }
+  </style>
+
+</head>
+<body class="min-h-screen bg-slate-100">
+  <div class="min-h-screen flex flex-col">
+
+    <!-- Top Navbar -->
+    <header class="bg-white border-b border-slate-200">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="h-8 w-8 rounded-xl bg-emerald-600 flex items-center justify-center text-white text-sm font-bold">
+            SD
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-slate-800">
+              SmartDairy
+            </p>
+            <p class="text-[11px] text-slate-500 -mt-0.5">
+              Dairy Farm Management
+            </p>
+          </div>
+        </div>
+
+        <!-- Right side: logged in user / auth links -->
+        <div class="flex items-center gap-3 text-[11px]">
+          {% if session.get('user_id') %}
+            <div class="flex flex-col items-end">
+              <span class="text-slate-700">
+                Hi, {{ session.get('username') }}
+                <span class="text-slate-400">({{ session.get('role') }})</span>
+              </span>
+              <a href="{{ url_for('logout') }}" class="text-emerald-600 hover:underline">
+                Logout
+              </a>
+              {% if session.get('role') != 'admin' %}
+                <a href="{{ url_for('account_delete') }}"
+                   class="block text-[11px] text-red-600 hover:underline no-print">
+                  Delete my account
+                </a>
+              {% endif %}
+            </div>
+          {% else %}
+            <div class="flex items-center gap-3">
+              <a href="{{ url_for('login') }}" class="text-emerald-600 hover:underline">
+                Login
+              </a>
+              <a href="{{ url_for('register') }}" class="text-slate-600 hover:underline">
+                Register
+              </a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </header>
+
+    <!-- Main layout: Sidebar + Content -->
+    <div class="flex-1 flex flex-col md:flex-row">
+
+      <!-- Sidebar -->
+      <aside class="w-full md:w-64 border-b md:border-b-0 md:border-r border-slate-200 bg-white">
+        <div class="max-w-6xl md:max-w-full mx-auto px-4 sm:px-6 lg:px-4 py-3">
+          <nav class="bg-white border border-slate-200 rounded-xl shadow-sm p-3 space-y-1 text-xs">
+            <p class="uppercase text-[10px] font-semibold text-slate-400 mb-1">
+              Navigation
+            </p>
+
+            <!-- Dashboard -->
+            <a href="{{ url_for('dashboard') }}"
+               class="block rounded-md px-3 py-2
+                 {% if request.endpoint == 'dashboard' %}
+                   bg-emerald-50 text-emerald-700 font-medium
+                 {% else %}
+                   text-slate-700 hover:bg-slate-50
+                 {% endif %}">
+              📊 Dashboard
+            </a>
+
+            <!-- Buffaloes -->
+            <a href="{{ url_for('buffalo_list') }}"
+               class="block rounded-md px-3 py-2
+                 {% if request.endpoint in ['buffalo_list', 'buffalo_add', 'buffalo_edit'] %}
+                   bg-emerald-50 text-emerald-700 font-medium
+                 {% else %}
+                   text-slate-700 hover:bg-slate-50
+                 {% endif %}">
+              🐃 Buffaloes
+            </a>
+
+            <!-- Milk Records -->
+            <a href="{{ url_for('milk_record_list') }}"
+               class="block rounded-md px-3 py-2
+                 {% if request.endpoint == 'milk_record_list' or request.endpoint in ['milk_record_add', 'milk_record_edit'] %}
+                   bg-emerald-50 text-emerald-700 font-medium
+                 {% else %}
+                   text-slate-700 hover:bg-slate-50
+                 {% endif %}">
+              🥛 Milk Records
+            </a>
+
+            <!-- Workers -->
+            <a href="{{ url_for('worker_list') }}"
+               class="block rounded-md px-3 py-2
+                 {% if request.endpoint in ['worker_list', 'worker_add', 'worker_edit'] %}
+                   bg-emerald-50 text-emerald-700 font-medium
+                 {% else %}
+                   text-slate-700 hover:bg-slate-50
+                 {% endif %}">
+              👷 Workers
+            </a>
+
+            <!-- Salaries -->
+            <a href="{{ url_for('salary_list') }}"
+               class="block rounded-md px-3 py-2
+                 {% if request.endpoint in ['salary_list', 'salary_add', 'salary_edit'] %}
+                   bg-emerald-50 text-emerald-700 font-medium
+                 {% else %}
+                   text-slate-700 hover:bg-slate-50
+                 {% endif %}">
+              💸 Salaries
+            </a>
+
+            <!-- Salary Report -->
+            <a href="{{ url_for('salary_report') }}"
+               class="block rounded-md px-3 py-2
+                 {% if request.endpoint == 'salary_report' %}
+                   bg-emerald-50 text-emerald-700 font-medium
+                 {% else %}
+                   text-slate-700 hover:bg-slate-50
+                 {% endif %}">
+              📑 Salary Report
+            </a>
+
+            <!-- Expenses -->
+            <a href="{{ url_for('expense_list') }}"
+               class="block rounded-md px-3 py-2
+                 {% if request.endpoint in ['expense_list', 'expense_add', 'expense_edit'] %}
+                   bg-emerald-50 text-emerald-700 font-medium
+                 {% else %}
+                   text-slate-700 hover:bg-slate-50
+                 {% endif %}">
+              📉 Expenses
+            </a>
+
+            <hr class="my-2 border-slate-200" />
+
+            <!-- Auth quick links (for mobile / fallback) -->
+            <div class="space-y-1">
+              {% if not session.get('user_id') %}
+                <a href="{{ url_for('login') }}"
+                   class="block rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-50">
+                  🔑 Login
+                </a>
+                <a href="{{ url_for('register') }}"
+                   class="block rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-50">
+                  🆕 Register
+                </a>
+              {% else %}
+                <a href="{{ url_for('logout') }}"
+                   class="block rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-50">
+                  🚪 Logout
+                </a>
+              {% endif %}
+            </div>
+
+            {% if session.get('role') == 'admin' %}
+              <hr class="my-2 border-slate-200" />
+              <p class="uppercase text-[10px] font-semibold text-slate-400 mb-1">
+                Admin
+              </p>
+
+              <a href="{{ url_for('admin_users') }}"
+                 class="block rounded-md px-3 py-2
+                   {% if request.endpoint == 'admin_users' %}
+                     bg-emerald-50 text-emerald-700 font-medium
+                   {% else %}
+                     text-slate-700 hover:bg-slate-50
+                   {% endif %}">
+                👥 Users
+              </a>
+
+              <a href="{{ url_for('backup_page') }}"
+                 class="block rounded-md px-3 py-2
+                   {% if request.endpoint == 'backup_page' %}
+                     bg-emerald-50 text-emerald-700 font-medium
+                   {% else %}
+                     text-slate-700 hover:bg-slate-50
+                   {% endif %}">
+                🗄 Backup & Restore
+              </a>
+            {% endif %}
+          </nav>
+        </div>
+      </aside>
+
+      <!-- Content + Flash messages -->
+      <main class="flex-1 w-full overflow-x-hidden overflow-y-auto">
+        <div class="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 py-4">
+
+          <!-- Flash messages -->
+          {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+              <div class="space-y-2 mb-3">
+                {% for category, message in messages %}
+                  {% set base_classes = "px-3 py-2 rounded-lg text-xs border flex items-start justify-between gap-3" %}
+                  {% if category == 'success' %}
+                    {% set classes = base_classes + " bg-emerald-50 border-emerald-200 text-emerald-800" %}
+                  {% elif category == 'error' %}
+                    {% set classes = base_classes + " bg-red-50 border-red-200 text-red-800" %}
+                  {% elif category == 'info' %}
+                    {% set classes = base_classes + " bg-sky-50 border-sky-200 text-sky-800" %}
+                  {% else %}
+                    {% set classes = base_classes + " bg-slate-50 border-slate-200 text-slate-800" %}
+                  {% endif %}
+
+                  <div class="{{ classes }}">
+                    <div class="flex-1">
+                      {{ message }}
+                    </div>
+                    <button type="button"
+                            onclick="this.parentElement.remove()"
+                            class="text-[10px] uppercase tracking-wide">
+                      ✕
+                    </button>
+                  </div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          {% endwith %}
+
+          <!-- Page specific content -->
+          <section>
+            {% block content %}{% endblock %}
+          </section>
+
+        </div>
+      </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-200 bg-gradient-to-r from-white to-slate-50">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-[12px] text-slate-600">
+        <span class="flex items-center gap-1">
+          © {{ current_year or 2025 }}
+          <span class="font-medium text-slate-700">SmartDairy</span>
+        </span>
+
+        <span class="text-slate-700 font-semibold hover:text-blue-600 transition">
+          Made by Arif
+        </span>
+      </div>
+    </footer>
+
+  </div>
+</body>
+</html>

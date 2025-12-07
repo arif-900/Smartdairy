@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+{% block title %}Delete Account • SmartDairy{% endblock %}
+
+{% block content %}
+
+<div class="max-w-md mx-auto bg-white border border-slate-200 rounded-xl p-4 shadow-sm card-hover text-xs">
+  <h1 class="text-base font-semibold text-slate-800 mb-2">
+    Delete Your Account
+  </h1>
+  <p class="text-[11px] text-slate-600 mb-3">
+    This will permanently delete your login account <span class="font-semibold">{{ user.username }}</span>.
+    Your SmartDairy data (buffaloes, workers, salaries, expenses) will remain, but you will not be able to log in again
+    with this account unless you register a new one.
+  </p>
+
+  <div class="bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-3">
+    <p class="text-[11px] text-red-700 font-medium">
+      ⚠️ This action cannot be undone.
+    </p>
+  </div>
+
+  <form method="post" class="space-y-3">
+    <div>
+      <label class="block text-[11px] font-medium text-slate-600 mb-1">
+        Confirm your password
+      </label>
+      <input type="password"
+             name="password"
+             required
+             class="w-full rounded-md border border-slate-300 px-3 py-2 text-xs outline-none focus:ring-emerald-500 focus:border-emerald-500"
+             placeholder="Enter your password" />
+      <p class="text-[10px] text-slate-400 mt-1">
+        We ask for your password to confirm it is really you.
+      </p>
+    </div>
+
+    <div class="flex items-center justify-between gap-2">
+      <a href="{{ url_for('dashboard') }}"
+         class="text-[11px] text-slate-600 hover:underline">
+        ← Cancel and go back
+      </a>
+
+      <button type="submit"
+              onclick="return confirm('Are you sure you want to delete your account? This cannot be undone.');"
+              class="rounded-md bg-red-600 px-4 py-1.5 text-xs font-medium text-white hover:bg-red-700">
+        Delete my account
+      </button>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

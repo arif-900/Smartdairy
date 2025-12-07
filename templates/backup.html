@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+{% block title %}Backup & Restore • SmartDairy{% endblock %}
+
+{% block content %}
+
+<div class="space-y-1 mb-4">
+  <h1 class="text-xl font-semibold text-slate-800 tracking-tight">Backup & Restore</h1>
+  <p class="text-xs text-slate-500">
+    Download full database backup or restore from an earlier backup file.
+    <span class="font-semibold text-red-500">Restore will overwrite current data.</span>
+  </p>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+  <!-- Download Backup -->
+  <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm card-hover text-xs space-y-2">
+    <h2 class="text-sm font-semibold text-slate-800 mb-1">📥 Download Backup</h2>
+    <p class="text-[11px] text-slate-500">
+      This will download the entire SQLite database file (<code>.db</code>).
+      Keep it safely in Google Drive or external storage.
+    </p>
+    <a href="{{ url_for('backup_download') }}"
+       class="inline-flex items-center rounded-md bg-slate-800 px-4 py-1.5 text-xs font-medium text-white hover:bg-slate-900 mt-2">
+      ⬇️ Download smartdairy.db backup
+    </a>
+    <p class="text-[10px] text-slate-400 mt-2">
+      Tip: You can send this file to your email or store in cloud as a long-term backup.
+    </p>
+  </div>
+
+  <!-- Restore Backup -->
+  <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm card-hover text-xs space-y-2">
+    <h2 class="text-sm font-semibold text-slate-800 mb-1 text-red-600">🛟 Restore from Backup</h2>
+    <p class="text-[11px] text-slate-500">
+      Upload a previous <code>.db</code> file to restore all data.
+      <span class="font-semibold text-red-500">This will replace current records (buffaloes, workers, salaries, expenses, users).</span>
+    </p>
+
+    <form method="post" enctype="multipart/form-data" class="space-y-2 mt-2">
+      <div>
+        <label class="block text-[11px] font-medium text-slate-600 mb-1">
+          Choose backup file (.db or .sqlite)
+        </label>
+        <input type="file" name="db_file" accept=".db,.sqlite"
+               class="block w-full text-[11px] text-slate-700 border border-slate-300 rounded-md px-2 py-1.5 file:text-xs file:px-3 file:py-1.5 file:border-0 file:bg-slate-800 file:text-white file:rounded-md" />
+      </div>
+
+      <button type="submit"
+              onclick="return confirm('Are you sure? This will overwrite current database with the uploaded backup.');"
+              class="inline-flex items-center rounded-md bg-red-600 px-4 py-1.5 text-xs font-medium text-white hover:bg-red-700">
+        🔁 Restore from Backup
+      </button>
+    </form>
+
+    <p class="text-[10px] text-slate-400 mt-2">
+      Recommended: always <strong>download a fresh backup</strong> before restoring another one.
+    </p>
+  </div>
+
+</div>
+
+{% endblock %}

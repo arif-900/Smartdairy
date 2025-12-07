@@ -1,0 +1,113 @@
+{% extends "layout.html" %}
+{% block title %}Workers • SmartDairy{% endblock %}
+
+{% block content %}
+<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+  <div>
+    <h2 class="text-xl font-semibold text-slate-800">Workers</h2>
+    <p class="text-xs text-slate-500">
+      Maintain worker profiles, contact details and monthly salary info.
+    </p>
+  </div>
+  <a href="{{ url_for('worker_add') }}"
+     class="inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-xs font-medium text-white shadow hover:bg-emerald-700">
+    + Add Worker
+  </a>
+</div>
+
+  <div class="flex items-center gap-2 mt-1">
+    <button type="submit"
+            class="rounded-md bg-slate-800 px-4 py-1.5 text-xs font-medium text-white hover:bg-slate-900">
+      Apply Filters
+    </button>
+
+    <!-- Download CSV (already you have, if you keep it) -->
+    <a href="{{ url_for('worker_list', search=search, status=filter_status, download='csv') }}"
+       class="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 no-print">
+      ⬇️ Download CSV
+    </a>
+
+    <!-- New: Print / Save as PDF -->
+    <button type="button"
+            onclick="window.print()"
+            class="rounded-md border border-emerald-500 px-3 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-50 no-print">
+      🖨 Print / Save as PDF
+    </button>
+  </div>
+</form>
+
+
+<div class="bg-white border border-slate-200 rounded-lg shadow-sm mt-4">
+  <div class="overflow-x-auto">
+    <table class="min-w-full text-xs">
+      <thead class="bg-slate-50 border-b border-slate-200">
+        <tr>
+          <th class="px-3 py-2 text-left font-medium text-slate-600">ID</th>
+          <th class="px-3 py-2 text-left font-medium text-slate-600">Name</th>
+          <th class="px-3 py-2 text-left font-medium text-slate-600">Mobile</th>
+          <th class="px-3 py-2 text-left font-medium text-slate-600">Role</th>
+          <th class="px-3 py-2 text-left font-medium text-slate-600">Salary / Month</th>
+          <th class="px-3 py-2 text-left font-medium text-slate-600">Status</th>
+          <th class="px-3 py-2 text-right font-medium text-slate-600">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        {% for w in workers %}
+          <tr>
+            <td class="px-3 py-2 text-slate-700">
+              <a href="{{ url_for('worker_detail', worker_id=w.id) }}"
+                class="font-medium text-blue-600 hover:underline">
+                W-{{ w.id }}
+              </a>
+            </td>
+
+            <td class="px-3 py-2 text-slate-700">{{ w.name }}</td>
+            <td class="px-3 py-2 text-slate-700">{{ w.mobile }}</td>
+            <td class="px-3 py-2 text-slate-700">{{ w.role or '-' }}</td>
+            <td class="px-3 py-2 text-slate-700">
+              {% if w.salary_per_month %}
+                ₹ {{ "{:,}".format(w.salary_per_month) }}
+              {% else %}
+                -
+              {% endif %}
+            </td>
+            <td class="px-3 py-2">
+              {% if w.status == 'active' %}
+                <span class="inline-flex rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-medium text-emerald-700 border border-emerald-100">
+                  Active
+                </span>
+              {% else %}
+                <span class="inline-flex rounded-full bg-slate-50 px-2.5 py-0.5 text-[11px] font-medium text-slate-700 border border-slate-200">
+                  Left
+                </span>
+              {% endif %}
+            </td>
+            <td class="px-3 py-2 text-right space-x-2">
+              <a href="{{ url_for('worker_edit', worker_id=w.id) }}"
+                 class="text-[11px] text-sky-600 hover:underline">
+                Edit
+              </a>
+
+              <form action="{{ url_for('worker_delete', worker_id=w.id) }}"
+                    method="post" style="display:inline;"
+                    onsubmit="return confirm('Delete this worker record?');">
+                <button type="submit"
+                        class="text-[11px] text-red-600 hover:underline">
+                  Delete
+                </button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+        {% if not workers %}
+          <tr>
+            <td colspan="7" class="px-3 py-3 text-center text-[11px] text-slate-500">
+              No workers found.
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

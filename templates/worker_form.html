@@ -1,0 +1,120 @@
+{% extends "layout.html" %}
+{% block title %}{{ 'Edit Worker' if worker else 'Add Worker' }} • SmartDairy{% endblock %}
+
+{% block content %}
+<h2 class="text-xl font-semibold text-slate-800 mb-2">
+  {{ 'Edit Worker' if worker else 'Add Worker' }}
+</h2>
+
+<form method="post"
+      class="bg-white border border-slate-200 rounded-lg p-4 shadow-sm space-y-3 text-xs">
+
+  <div class="grid md:grid-cols-2 gap-3">
+    
+    <div>
+      <label class="block font-medium mb-1">Name *</label>
+      <input type="text" name="name" required
+             value="{{ worker.name if worker else '' }}"
+             placeholder="Full name"
+             class="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:ring-emerald-500" />
+    </div>
+
+    <div>
+      <label class="block font-medium mb-1">Mobile *</label>
+      <input type="text" name="mobile" required
+             value="{{ worker.mobile if worker else '' }}"
+             placeholder="Primary mobile"
+             class="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:ring-emerald-500" />
+    </div>
+
+    <div>
+      <label class="block font-medium mb-1">Alt Mobile</label>
+      <input type="text" name="alt_mobile"
+             value="{{ worker.alt_mobile if worker else '' }}"
+             placeholder="Optional"
+             class="w-full rounded-md border border-slate-300 px-3 py-2 outline-none" />
+    </div>
+
+    <div>
+      <label class="block font-medium mb-1">Role</label>
+      <input type="text" name="role"
+             value="{{ worker.role if worker else '' }}"
+             placeholder="Milking / Cleaning / Transport..."
+             class="w-full rounded-md border border-slate-300 px-3 py-2 outline-none" />
+    </div>
+
+    <div>
+      <label class="block font-medium mb-1">Bank Name</label>
+      <input type="text" name="bank_name"
+             value="{{ worker.bank_name if worker else '' }}"
+             placeholder="SBI / HDFC / Union Bank..."
+             class="w-full rounded-md border border-slate-300 px-3 py-2 outline-none" />
+    </div>
+
+    <div>
+      <label class="block font-medium mb-1">Account Number</label>
+      <input type="text" name="account_number"
+             value="{{ worker.account_number if worker else '' }}"
+             placeholder="Bank account number"
+             class="w-full rounded-md border border-slate-300 px-3 py-2 outline-none" />
+    </div>
+
+    <div>
+      <label class="block font-medium mb-1">IFSC</label>
+      <input type="text" name="ifsc"
+             value="{{ worker.ifsc if worker else '' }}"
+             placeholder="Bank IFSC code"
+             class="w-full rounded-md border border-slate-300 px-3 py-2 outline-none" />
+    </div>
+
+    <div>
+      <label class="block font-medium mb-1">Joining Date</label>
+      <input type="date" name="joining_date"
+             value="{{ default_joining }}"
+             class="w-full rounded-md border border-slate-300 px-3 py-2 outline-none" />
+    </div>
+
+    <div>
+      <label class="block font-medium mb-1">Salary Per Month (₹)</label>
+      <input type="number" name="salary_per_month"
+             value="{{ worker.salary_per_month if worker else '' }}"
+             placeholder="12000"
+             class="w-full rounded-md border border-slate-300 px-3 py-2 outline-none" />
+    </div>
+
+    <div>
+      <label class="block font-medium mb-1">Status</label>
+      <select name="status"
+              class="w-full rounded-md border border-slate-300 px-3 py-2 outline-none">
+        <option value="active"
+                {% if worker and worker.status == 'active' %}selected{% endif %}>
+          Active
+        </option>
+        <option value="left"
+                {% if worker and worker.status == 'left' %}selected{% endif %}>
+          Left
+        </option>
+      </select>
+    </div>
+
+  </div>
+
+  <div>
+    <label class="block font-medium mb-1">Notes</label>
+    <textarea name="notes" rows="3"
+              placeholder="Any additional notes..."
+              class="w-full rounded-md border border-slate-300 px-3 py-2 outline-none">{{ worker.notes if worker else '' }}</textarea>
+  </div>
+
+  <div class="flex items-center gap-2">
+    <button type="submit"
+            class="rounded-md bg-emerald-600 px-4 py-2 text-xs font-medium text-white hover:bg-emerald-700">
+      {{ 'Update Worker' if worker else 'Save Worker' }}
+    </button>
+    <a href="{{ url_for('worker_list') }}" class="text-xs text-slate-600 hover:underline">
+      Cancel
+    </a>
+  </div>
+
+</form>
+{% endblock %}

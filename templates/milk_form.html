@@ -1,0 +1,107 @@
+{% extends "layout.html" %}
+{% block title %}{{ 'Edit' if record else 'Add' }} Milk Record • SmartDairy{% endblock %}
+
+{% block content %}
+<div class="max-w-lg bg-white border border-slate-200 rounded-xl px-5 py-4 text-xs">
+  <h1 class="text-base font-semibold text-slate-800 mb-1">
+    {{ 'Edit' if record else 'Add' }} Milk Record
+  </h1>
+  <p class="text-[11px] text-slate-500 mb-4">
+    Record daily milk (morning & evening) for a buffalo or cow.
+  </p>
+
+  <form method="post" class="space-y-3">
+    <!-- Buffalo -->
+    <div>
+      <label class="block text-[11px] font-medium text-slate-600 mb-1">
+        Buffalo / Cow
+      </label>
+      <select
+        name="buffalo_id"
+        required
+        class="w-full rounded-md border border-slate-300 px-3 py-2 text-xs outline-none focus:ring-emerald-500 focus:border-emerald-500"
+      >
+        <option value="">Select...</option>
+        {% for b in buffaloes %}
+          <option value="{{ b.id }}"
+            {% if record and record.buffalo_id == b.id %}selected{% endif %}>
+            B-{{ b.id }} • {{ b.tag_name }} ({{ b.animal_type }})
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Date -->
+    <div>
+      <label class="block text-[11px] font-medium text-slate-600 mb-1">
+        Date
+      </label>
+      <input
+        type="date"
+        name="date"
+        required
+        value="{{ default_date }}"
+        class="w-full rounded-md border border-slate-300 px-3 py-2 text-xs outline-none focus:ring-emerald-500 focus:border-emerald-500"
+      />
+    </div>
+
+    <!-- Morning litres -->
+    <div>
+      <label class="block text-[11px] font-medium text-slate-600 mb-1">
+        Morning Milk (L)
+      </label>
+      <input
+        type="number"
+        step="0.1"
+        min="0"
+        name="morning_litres"
+        value="{{ record.morning_litres if record and record.morning_litres is not none else '' }}"
+        class="w-full rounded-md border border-slate-300 px-3 py-2 text-xs outline-none focus:ring-emerald-500 focus:border-emerald-500"
+        placeholder="e.g. 5.5"
+      />
+    </div>
+
+    <!-- Evening litres -->
+    <div>
+      <label class="block text-[11px] font-medium text-slate-600 mb-1">
+        Evening Milk (L)
+      </label>
+      <input
+        type="number"
+        step="0.1"
+        min="0"
+        name="evening_litres"
+        value="{{ record.evening_litres if record and record.evening_litres is not none else '' }}"
+        class="w-full rounded-md border border-slate-300 px-3 py-2 text-xs outline-none focus:ring-emerald-500 focus:border-emerald-500"
+        placeholder="e.g. 4.0"
+      />
+    </div>
+
+    <!-- Notes -->
+    <div>
+      <label class="block text-[11px] font-medium text-slate-600 mb-1">
+        Notes (optional)
+      </label>
+      <textarea
+        name="notes"
+        rows="2"
+        class="w-full rounded-md border border-slate-300 px-3 py-2 text-xs outline-none focus:ring-emerald-500 focus:border-emerald-500"
+        placeholder="Any remarks (health, diet, etc.)"
+      >{{ record.notes if record and record.notes else '' }}</textarea>
+    </div>
+
+    <div class="flex items-center justify-between pt-2">
+      <a
+        href="{{ url_for('milk_record_list') }}"
+        class="rounded-md border border-slate-300 px-3 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50">
+        Cancel
+      </a>
+      <button
+        type="submit"
+        class="rounded-md bg-emerald-600 px-4 py-1.5 text-[11px] font-medium text-white hover:bg-emerald-700">
+        {{ 'Update' if record else 'Save' }}
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

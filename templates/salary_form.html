@@ -1,0 +1,87 @@
+{% extends "layout.html" %}
+{% block title %}{{ 'Edit Salary Payment' if payment else 'Add Salary Payment' }} • SmartDairy{% endblock %}
+
+{% block content %}
+<h2 class="text-xl font-semibold text-slate-800 mb-2">
+  {{ 'Edit Salary Payment' if payment else 'Add Salary Payment' }}
+</h2>
+
+<form method="post"
+      class="bg-white border border-slate-200 rounded-lg p-4 shadow-sm space-y-3 text-xs">
+  <div class="grid md:grid-cols-2 gap-3">
+    <div>
+      <label class="block font-medium mb-1">Worker *</label>
+      <select name="worker_id" required
+              class="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+        <option value="">Select worker</option>
+        {% for w in workers %}
+          <option value="{{ w.id }}"
+                  {% if payment and payment.worker_id == w.id %}selected{% endif %}>
+            {{ w.name }} ({{ w.mobile }})
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div>
+      <label class="block font-medium mb-1">Month *</label>
+      <input type="month" name="month" required
+             value="{{ default_month }}"
+             class="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+      <p class="mt-1 text-[11px] text-slate-500">Example: 2025-12</p>
+    </div>
+
+    <div>
+      <label class="block font-medium mb-1">Amount (₹) *</label>
+      <input type="number" name="amount" required min="0"
+             value="{{ payment.amount if payment else '' }}"
+             placeholder="e.g. 12000"
+             class="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+    </div>
+
+    <div>
+      <label class="block font-medium mb-1">Payment Mode</label>
+      <select name="payment_mode"
+              class="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+        {% set mode = payment.payment_mode if payment else '' %}
+        <option value="">Select</option>
+        <option value="cash" {% if mode == 'cash' %}selected{% endif %}>Cash</option>
+        <option value="upi" {% if mode == 'upi' %}selected{% endif %}>UPI</option>
+        <option value="bank" {% if mode == 'bank' %}selected{% endif %}>Bank Transfer</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="block font-medium mb-1">Date Paid *</label>
+      <input type="date" name="date_paid" required
+             value="{{ default_date }}"
+             class="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+    </div>
+
+    <div>
+      <label class="block font-medium mb-1">Transaction Ref (optional)</label>
+      <input type="text" name="transaction_ref"
+             value="{{ payment.transaction_ref if payment else '' }}"
+             placeholder="UPI ref / bank ref"
+             class="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+    </div>
+  </div>
+
+  <div>
+    <label class="block font-medium mb-1">Notes</label>
+    <textarea name="notes" rows="3"
+              placeholder="Any extra details about this payment..."
+              class="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">{{ payment.notes if payment else '' }}</textarea>
+  </div>
+
+  <div class="flex items-center gap-2">
+    <button type="submit"
+            class="rounded-md bg-emerald-600 px-4 py-2 text-xs font-medium text-white hover:bg-emerald-700">
+      {{ 'Update Payment' if payment else 'Save Payment' }}
+    </button>
+    <a href="{{ url_for('salary_list') }}" class="text-xs text-slate-600 hover:underline">
+      Cancel
+    </a>
+  </div>
+</form>
+{% endblock %}

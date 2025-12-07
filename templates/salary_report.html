@@ -1,0 +1,158 @@
+{% extends "layout.html" %}
+{% block title %}Salary Report • SmartDairy{% endblock %}
+
+{% block content %}
+
+<div class="space-y-1 mb-4 no-print">
+  <h1 class="text-xl font-semibold text-slate-800 tracking-tight">Salary Report</h1>
+  <p class="text-xs text-slate-500">
+    Monthly summary of salaries for active workers — expected, paid and due amounts.
+  </p>
+</div>
+
+<!-- Filter + Print bar -->
+<div class="bg-white border border-slate-200 rounded-lg p-3 shadow-sm space-y-3 mt-1 no-print">
+  <form method="get" class="flex flex-col md:flex-row md:items-end md:justify-between gap-3 text-xs">
+    <div>
+      <label class="block text-[11px] font-medium text-slate-600 mb-1">
+        Select Month
+      </label>
+      <select name="month"
+              class="rounded-md border border-slate-300 px-3 py-2 text-xs outline-none focus:ring-emerald-500 focus:border-emerald-500">
+        {% if not month_values %}
+          <option value="{{ month }}" selected>{{ month }}</option>
+        {% else %}
+          {% for m in month_values %}
+            <option value="{{ m }}" {% if m == month %}selected{% endif %}>
+              {{ m }}
+            </option>
+          {% endfor %}
+        {% endif %}
+      </select>
+      <p class="text-[10px] text-slate-400 mt-1">
+        Format: YYYY-MM (e.g. 2025-12). Defaults to current month if empty.
+      </p>
+    </div>
+
+    <div class="flex items-center gap-2 mt-1 md:mt-0">
+      <button type="submit"
+              class="rounded-md bg-slate-800 px-4 py-1.5 text-xs font-medium text-white hover:bg-slate-900">
+        Apply
+      </button>
+
+      <button type="button"
+              onclick="window.print()"
+              class="rounded-md border border-emerald-500 px-3 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-50">
+        🖨 Print / Save as PDF
+      </button>
+    </div>
+  </form>
+</div>
+
+<!-- Summary bar (also visible in PDF) -->
+<div class="bg-white border border-slate-200 rounded-lg p-3 shadow-sm mt-4">
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 text-xs">
+    <div>
+      <p class="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">
+        Salary Summary — {{ month_label }}
+      </p>
+      <p class="text-sm text-slate-700">
+        Active workers: <span class="font-semibold">{{ rows|length }}</span>
+      </p>
+    </div>
+    <div class="flex flex-wrap gap-4">
+      <div>
+        <p class="text-[11px] text-slate-500">Total Expected</p>
+        <p class="text-sm font-semibold text-slate-800">
+          ₹ {{ "{:,}".format(total_expected or 0) }}
+        </p>
+      </div>
+      <div>
+        <p class="text-[11px] text-slate-500">Total Paid</p>
+        <p class="text-sm font-semibold text-emerald-700">
+          ₹ {{ "{:,}".format(total_paid or 0) }}
+        </p>
+      </div>
+      <div>
+        <p class="text-[11px] text-slate-500">Total Due</p>
+        <p class="text-sm font-semibold text-red-600">
+          ₹ {{ "{:,}".format(total_due or 0) }}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="bg-white border border-slate-200 rounded-lg shadow-sm mt-4">
+  <div class="overflow-x-auto">
+    <table class="min-w-full text-xs table-row-hover">
+      <thead class="bg-slate-50 border-b border-slate-200">
+        <tr>
+          <th class="px-3 py-2 text-left font-medium text-slate-600">Worker</th>
+          <th class="px-3 py-2 text-left font-medium text-slate-600">Mobile</th>
+          <th class="px-3 py-2 text-right font-medium text-slate-600">Expected / Month</th>
+          <th class="px-3 py-2 text-right font-medium text-slate-600">Paid ({{ month }})</th>
+          <th class="px-3 py-2 text-right font-medium text-slate-600">Due</th>
+          <th class="px-3 py-2 text-left font-medium text-slate-600">Status</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        {% for row in rows %}
+          {% set w = row.worker %}
+          <tr>
+            <td class="px-3 py-2 text-slate-700">
+              <a href="{{ url_for('worker_detail', worker_id=w.id) }}" class="hover:underline">
+                W-{{ w.id }} • {{ w.name }}
+              </a>
+            </td>
+            <td class="px-3 py-2 text-slate-700">
+              {{ w.mobile or '-' }}
+            </td>
+            <td class="px-3 py-2 text-right text-slate-700">
+              {% if row.expected %}
+                ₹ {{ "{:,}".format(row.expected) }}
+              {% else %}
+                -
+              {% endif %}
+            </td>
+            <td class="px-3 py-2 text-right text-slate-700">
+              {% if row.paid %}
+                ₹ {{ "{:,}".format(row.paid) }}
+              {% else %}
+                ₹ 0
+              {% endif %}
+            </td>
+            <td class="px-3 py-2 text-right text-slate-700">
+              {% if row.due %}
+                ₹ {{ "{:,}".format(row.due) }}
+              {% else %}
+                ₹ 0
+              {% endif %}
+            </td>
+            <td class="px-3 py-2">
+              {% if row.status == "Paid" %}
+                <span class="badge badge-soft-green">Paid</span>
+              {% elif row.status == "Partially Paid" %}
+                <span class="badge badge-soft-slate">Partially Paid</span>
+              {% elif row.status == "Not Paid" %}
+                <span class="badge badge-soft-slate">Not Paid</span>
+              {% else %}
+                <span class="badge badge-soft-slate">{{ row.status }}</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+        {% if not rows %}
+          <tr>
+            <td colspan="6" class="px-3 py-3 text-center text-[11px] text-slate-500">
+              No active workers found.
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

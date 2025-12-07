@@ -1,0 +1,138 @@
+{% extends "layout.html" %}
+{% block title %}Milk Records • SmartDairy{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-base font-semibold text-slate-800">Milk Records</h1>
+  <a href="{{ url_for('milk_record_add') }}"
+     class="inline-flex items-center rounded-md bg-emerald-600 px-3 py-1.5 text-[11px] font-medium text-white hover:bg-emerald-700">
+    + Add Milk Record
+  </a>
+</div>
+
+<form method="get" class="mb-3 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+  <div>
+    <label class="block text-[11px] font-medium text-slate-600 mb-1">Date</label>
+    <input
+      type="date"
+      name="date"
+      value="{{ date_str or '' }}"
+      class="w-full rounded-md border border-slate-300 px-2 py-1.5 text-xs outline-none focus:ring-emerald-500 focus:border-emerald-500"
+    />
+  </div>
+
+  <div>
+    <label class="block text-[11px] font-medium text-slate-600 mb-1">Buffalo / Cow</label>
+    <select
+      name="buffalo_id"
+      class="w-full rounded-md border border-slate-300 px-2 py-1.5 text-xs outline-none focus:ring-emerald-500 focus:border-emerald-500"
+    >
+      <option value="">All</option>
+      {% for b in buffaloes %}
+        <option value="{{ b.id }}" {% if selected_buffalo_id and selected_buffalo_id|int == b.id %}selected{% endif %}>
+          B-{{ b.id }} • {{ b.tag_name }} ({{ b.animal_type }})
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="flex items-end gap-2">
+    <button
+      type="submit"
+      class="rounded-md bg-slate-800 px-3 py-1.5 text-[11px] font-medium text-white hover:bg-slate-900">
+      Apply Filters
+    </button>
+    <a
+      href="{{ url_for('milk_record_list') }}"
+      class="rounded-md border border-slate-300 px-3 py-1.5 text-[11px] font-medium text-slate-700 hover:bg-slate-50">
+      Clear
+    </a>
+  </div>
+</form>
+
+<div class="flex items-center justify-end mb-3 gap-2 text-[11px]">
+  <a
+    href="{{ url_for('milk_record_list', date=date_str, buffalo_id=selected_buffalo_id, download='csv') }}"
+    class="inline-flex items-center rounded-md border border-slate-300 px-3 py-1.5 hover:bg-slate-50"
+  >
+    Download CSV
+  </a>
+  <a
+    href="{{ url_for('milk_record_list', date=date_str, buffalo_id=selected_buffalo_id, download='pdf') }}"
+    class="inline-flex items-center rounded-md border border-slate-300 px-3 py-1.5 hover:bg-slate-50"
+  >
+    Download PDF
+  </a>
+</div>
+
+<div class="overflow-x-auto text-xs">
+  <table class="min-w-full border border-slate-200 rounded-lg overflow-hidden bg-white">
+    <thead class="bg-slate-50 text-[11px] text-slate-600">
+      <tr>
+        <th class="px-3 py-2 text-left border-b border-slate-200">Date</th>
+        <th class="px-3 py-2 text-left border-b border-slate-200">Buffalo</th>
+        <th class="px-3 py-2 text-right border-b border-slate-200">Morning (L)</th>
+        <th class="px-3 py-2 text-right border-b border-slate-200">Evening (L)</th>
+        <th class="px-3 py-2 text-right border-b border-slate-200">Total (L)</th>
+        <th class="px-3 py-2 text-left border-b border-slate-200">Notes</th>
+        <th class="px-3 py-2 text-right border-b border-slate-200">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100">
+      {% if records %}
+        {% for r in records %}
+          <tr>
+            <td class="px-3 py-2 align-top">
+              {{ r.date.strftime("%d-%m-%Y") }}
+            </td>
+            <td class="px-3 py-2 align-top">
+              B-{{ r.buffalo.id }} • {{ r.buffalo.tag_name }}<br>
+              <span class="text-[10px] text-slate-500 uppercase">{{ r.buffalo.animal_type }}</span>
+            </td>
+            <td class="px-3 py-2 text-right align-top">
+              {{ "%.2f"|format(r.morning_litres or 0) }}
+            </td>
+            <td class="px-3 py-2 text-right align-top">
+              {{ "%.2f"|format(r.evening_litres or 0) }}
+            </td>
+            <td class="px-3 py-2 text-right align-top font-semibold text-slate-800">
+              {{ "%.2f"|format(r.total_litres) }}
+            </td>
+            <td class="px-3 py-2 align-top max-w-[200px]">
+              <span class="line-clamp-2 text-[11px] text-slate-600">
+                {{ r.notes or "" }}
+              </span>
+            </td>
+            <td class="px-3 py-2 text-right align-top">
+              <a
+                href="{{ url_for('milk_record_edit', record_id=r.id) }}"
+                class="inline-flex items-center rounded-md border border-slate-300 px-2 py-1 text-[10px] hover:bg-slate-50">
+                Edit
+              </a>
+              {% if session.get('role') == 'admin' %}
+                <form
+                  method="post"
+                  action="{{ url_for('milk_record_delete', record_id=r.id) }}"
+                  class="inline-block ml-1"
+                  onsubmit="return confirm('Delete this milk record?');">
+                  <button
+                    type="submit"
+                    class="inline-flex items-center rounded-md border border-red-200 px-2 py-1 text-[10px] text-red-600 hover:bg-red-50">
+                    Delete
+                  </button>
+                </form>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      {% else %}
+        <tr>
+          <td colspan="7" class="px-3 py-4 text-center text-[11px] text-slate-500">
+            No milk records found. Add the first one.
+          </td>
+        </tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

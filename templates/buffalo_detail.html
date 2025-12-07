@@ -1,0 +1,149 @@
+{% extends "layout.html" %}
+{% block title %}Buffalo Detail • B-{{ buffalo.id }} {{ buffalo.tag_name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl space-y-4">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-base font-semibold text-slate-800">
+        B-{{ buffalo.id }} • {{ buffalo.tag_name }}
+      </h1>
+      <p class="text-[11px] text-slate-500">
+        {{ buffalo.animal_type|capitalize if buffalo.animal_type else 'Buffalo' }}
+        • Status:
+        <span class="font-medium uppercase">
+          {{ buffalo.status }}
+        </span>
+      </p>
+    </div>
+
+    <div class="flex gap-2">
+      <!-- Edit Button -->
+      <a
+        href="{{ url_for('buffalo_edit', buffalo_id=buffalo.id) }}"
+        class="inline-flex items-center rounded-md border border-slate-300 px-3 py-1.5 text-[11px] hover:bg-slate-50">
+        Edit
+      </a>
+
+      <!-- Milk Summary Button -->
+      <a
+        href="{{ url_for('buffalo_milk_summary', buffalo_id=buffalo.id) }}"
+        class="inline-flex items-center rounded-md border border-slate-300 px-3 py-1.5 text-[11px] hover:bg-slate-50">
+        View Milk Summary
+      </a>
+
+      <!-- Delete button (admin only) -->
+      {% if session.get('role') == 'admin' %}
+        <form
+          method="post"
+          action="{{ url_for('buffalo_delete', buffalo_id=buffalo.id) }}"
+          onsubmit="return confirm('Delete this buffalo record?');"
+        >
+          <button
+            type="submit"
+            class="inline-flex items-center rounded-md border border-red-200 px-3 py-1.5 text-[11px] text-red-600 hover:bg-red-50">
+            Delete
+          </button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Main info card -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+
+    <div class="rounded-xl border border-slate-200 bg-white px-4 py-3 space-y-1">
+      <div>
+        <div class="text-[11px] text-slate-500">Animal Type</div>
+        <div class="font-medium text-slate-800">
+          {{ buffalo.animal_type|capitalize if buffalo.animal_type else '-' }}
+        </div>
+      </div>
+
+      <div>
+        <div class="text-[11px] text-slate-500">Age</div>
+        <div class="font-medium text-slate-800">
+          {{ buffalo.age or '-' }}
+        </div>
+      </div>
+
+      <div>
+        <div class="text-[11px] text-slate-500">Status</div>
+        <div class="font-medium text-slate-800 uppercase">
+          {{ buffalo.status or '-' }}
+        </div>
+      </div>
+    </div>
+
+    <div class="rounded-xl border border-slate-200 bg-white px-4 py-3 space-y-1">
+      <div>
+        <div class="text-[11px] text-slate-500">Purchase Date</div>
+        <div class="font-medium text-slate-800">
+          {% if buffalo.purchase_date %}
+            {{ buffalo.purchase_date.strftime("%d-%m-%Y") }}
+          {% else %}
+            -
+          {% endif %}
+        </div>
+      </div>
+
+      <div>
+        <div class="text-[11px] text-slate-500">Purchase Price</div>
+        <div class="font-medium text-slate-800">
+          {% if buffalo.purchase_price %}
+            ₹ {{ buffalo.purchase_price }}
+          {% else %}
+            -
+          {% endif %}
+        </div>
+      </div>
+
+      <div>
+        <div class="text-[11px] text-slate-500">Tag / Name</div>
+        <div class="font-medium text-slate-800">
+          {{ buffalo.tag_name }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Seller info -->
+  <div class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs">
+    <h2 class="text-[12px] font-semibold text-slate-800 mb-2">Seller Details</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div>
+        <div class="text-[11px] text-slate-500">Seller Name</div>
+        <div class="font-medium text-slate-800">
+          {{ buffalo.seller_name or '-' }}
+        </div>
+      </div>
+      <div>
+        <div class="text-[11px] text-slate-500">Seller Mobile</div>
+        <div class="font-medium text-slate-800">
+          {{ buffalo.seller_mobile or '-' }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notes -->
+  <div class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs">
+    <h2 class="text-[12px] font-semibold text-slate-800 mb-2">Notes</h2>
+    <p class="text-[11px] text-slate-600 whitespace-pre-line">
+      {{ buffalo.notes or 'No additional notes.' }}
+    </p>
+  </div>
+
+  <!-- Back link -->
+  <div class="flex justify-between items-center text-xs mt-2">
+    <a
+      href="{{ url_for('buffalo_list') }}"
+      class="inline-flex items-center rounded-md border border-slate-300 px-3 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50">
+      ← Back to Buffalo List
+    </a>
+  </div>
+
+</div>
+{% endblock %}

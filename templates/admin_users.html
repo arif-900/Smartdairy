@@ -1,0 +1,71 @@
+{% extends "layout.html" %}
+{% block title %}Users • SmartDairy Admin{% endblock %}
+
+{% block content %}
+<div class="space-y-1 mb-4">
+  <h1 class="text-xl font-semibold text-slate-800 tracking-tight">User Management</h1>
+  <p class="text-xs text-slate-500">
+    Admin can remove normal user accounts. Admin accounts cannot be deleted.
+  </p>
+</div>
+
+<div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-x-auto">
+  <table class="min-w-full text-xs table-row-hover">
+    <thead class="bg-slate-50 border-b border-slate-200">
+      <tr>
+        <th class="px-3 py-2 text-left">ID</th>
+        <th class="px-3 py-2 text-left">Username</th>
+        <th class="px-3 py-2 text-left">Email</th>
+        <th class="px-3 py-2 text-left">Role</th>
+        <th class="px-3 py-2 text-left">Created</th>
+        <th class="px-3 py-2 text-left">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100">
+      {% for u in users %}
+        <tr>
+          <td class="px-3 py-2">U-{{ u.id }}</td>
+          <td class="px-3 py-2">
+            {{ u.username }}
+            {% if u.id == session.get('user_id') %}
+              <span class="badge badge-soft-green ml-1">You</span>
+            {% endif %}
+          </td>
+          <td class="px-3 py-2">{{ u.email }}</td>
+          <td class="px-3 py-2">
+            {% if u.role == 'admin' %}
+              <span class="badge badge-soft-green">Admin</span>
+            {% else %}
+              <span class="badge badge-soft-slate">User</span>
+            {% endif %}
+          </td>
+          <td class="px-3 py-2">
+            {{ u.created_at.strftime("%Y-%m-%d %H:%M") if u.created_at else '-' }}
+          </td>
+          <td class="px-3 py-2">
+            {% if u.role != 'admin' %}
+              <form method="post"
+                    action="{{ url_for('admin_user_delete', user_id=u.id) }}"
+                    onsubmit="return confirm('Delete user {{ u.username }}? This cannot be undone.');">
+                <button type="submit"
+                        class="rounded-md bg-red-600 px-3 py-1 text-[11px] font-medium text-white hover:bg-red-700">
+                  Delete
+                </button>
+              </form>
+            {% else %}
+              <span class="text-[11px] text-slate-400">Protected</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      {% if not users %}
+        <tr>
+          <td colspan="6" class="px-3 py-3 text-center text-[11px] text-slate-500">
+            No users found.
+          </td>
+        </tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

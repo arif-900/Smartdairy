@@ -1,0 +1,147 @@
+{% extends "layout.html" %}
+{% block title %}Buffaloes • SmartDairy{% endblock %}
+
+{% block content %}
+<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+  <div>
+    <h2 class="text-xl font-semibold text-slate-800">Buffaloes</h2>
+    <p class="text-xs text-slate-500">
+      Maintain all buffalo and cow records.
+    </p>
+  </div>
+  <a href="{{ url_for('buffalo_add') }}"
+     class="inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-xs font-medium text-white shadow hover:bg-emerald-700">
+    + Add New Buffalo
+  </a>
+</div>
+
+<form method="get" class="bg-white border border-slate-200 rounded-lg p-3 shadow-sm space-y-3 mt-4">
+  <h3 class="text-sm font-medium text-slate-700">Search & Filters</h3>
+  <div class="grid gap-3 md:grid-cols-4">
+    <div class="md:col-span-2">
+      <label class="block text-xs font-medium text-slate-500 mb-1">
+        Search (ID / Tag / Seller)
+      </label>
+      <input type="text" name="search" value="{{ search }}"
+             placeholder="Type to search..."
+             class="w-full rounded-md border border-slate-300 px-3 py-2 text-xs outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+    </div>
+    <div>
+      <label class="block text-xs font-medium text-slate-500 mb-1">Type</label>
+      <select name="type"
+              class="w-full rounded-md border border-slate-300 px-3 py-2 text-xs outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+        <option value="" {% if not filter_type %}selected{% endif %}>All</option>
+        <option value="buffalo" {% if filter_type == 'buffalo' %}selected{% endif %}>Buffalo</option>
+        <option value="cow" {% if filter_type == 'cow' %}selected{% endif %}>Cow</option>
+      </select>
+    </div>
+    <div>
+      <label class="block text-xs font-medium text-slate-500 mb-1">Status</label>
+      <select name="status"
+              class="w-full rounded-md border border-slate-300 px-3 py-2 text-xs outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+        <option value="" {% if not filter_status %}selected{% endif %}>All</option>
+        <option value="active" {% if filter_status == 'active' %}selected{% endif %}>Active</option>
+        <option value="sold" {% if filter_status == 'sold' %}selected{% endif %}>Sold</option>
+        <option value="dead" {% if filter_status == 'dead' %}selected{% endif %}>Dead</option>
+      </select>
+    </div>
+  </div>
+  <div>
+    <div class="flex items-center gap-2 mt-1">
+  <button type="submit" class="...">
+    Apply Filters
+  </button>
+
+  <a href="{{ url_for('buffalo_list', search=search, type=filter_type, status=filter_status, download='csv') }}"
+     class="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 no-print">
+    ⬇️ Download CSV
+  </a>
+
+  <button type="button"
+          onclick="window.print()"
+          class="rounded-md border border-emerald-500 px-3 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-50 no-print">
+    🖨 Print / Save as PDF
+  </button>
+</div>
+
+  </div>
+</form>
+
+<div class="bg-white border border-slate-200 rounded-lg shadow-sm mt-4">
+  <div class="overflow-x-auto">
+    <table class="min-w-full text-xs">
+      <thead class="bg-slate-50 border-b border-slate-200">
+        <tr>
+          <th class="px-3 py-2 text-left font-medium text-slate-600">ID</th>
+          <th class="px-3 py-2 text-left font-medium text-slate-600">Tag / Name</th>
+          <th class="px-3 py-2 text-left font-medium text-slate-600">Type</th>
+          <th class="px-3 py-2 text-left font-medium text-slate-600">Purchase Date</th>
+          <th class="px-3 py-2 text-left font-medium text-slate-600">Price (₹)</th>
+          <th class="px-3 py-2 text-left font-medium text-slate-600">Seller</th>
+          <th class="px-3 py-2 text-left font-medium text-slate-600">Status</th>
+          <th class="px-3 py-2 text-right font-medium text-slate-600">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        {% for b in buffaloes %}
+          <tr>
+            <td class="px-3 py-2 text-slate-700">
+              <a href="{{ url_for('buffalo_detail', buffalo_id=b.id) }}"
+                class="font-medium text-blue-600 hover:underline">
+                B-{{ b.id }}
+              </a>
+            </td>
+
+            <td class="px-3 py-2 text-slate-700">{{ b.tag_name }}</td>
+            <td class="px-3 py-2 text-slate-700">{{ b.animal_type|title }}</td>
+            <td class="px-3 py-2 text-slate-700">
+              {% if b.purchase_date %}{{ b.purchase_date.strftime("%d-%m-%Y") }}{% endif %}
+            </td>
+            <td class="px-3 py-2 text-slate-700">
+              {% if b.purchase_price %}₹ {{ "{:,}".format(b.purchase_price) }}{% endif %}
+            </td>
+            <td class="px-3 py-2 text-slate-700">{{ b.seller_name }}</td>
+            <td class="px-3 py-2">
+              {% if b.status == 'active' %}
+                <span class="inline-flex rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-medium text-emerald-700 border border-emerald-100">
+                  Active
+                </span>
+              {% elif b.status == 'sold' %}
+                <span class="inline-flex rounded-full bg-slate-50 px-2.5 py-0.5 text-[11px] font-medium text-slate-700 border border-slate-200">
+                  Sold
+                </span>
+              {% else %}
+                <span class="inline-flex rounded-full bg-red-50 px-2.5 py-0.5 text-[11px] font-medium text-red-700 border border-red-200">
+                  {{ b.status|title }}
+                </span>
+              {% endif %}
+            </td>
+            <td class="px-3 py-2 text-right space-x-2">
+              <a href="{{ url_for('buffalo_edit', buffalo_id=b.id) }}"
+                 class="text-[11px] text-sky-600 hover:underline">
+                Edit
+              </a>
+
+              <form action="{{ url_for('buffalo_delete', buffalo_id=b.id) }}"
+                    method="post" style="display:inline;"
+                    onsubmit="return confirm('Delete this buffalo record?');">
+                <button type="submit"
+                        class="text-[11px] text-red-600 hover:underline">
+                  Delete
+                </button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+        {% if not buffaloes %}
+          <tr>
+            <td colspan="8" class="px-3 py-3 text-center text-[11px] text-slate-500">
+              No buffaloes found.
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

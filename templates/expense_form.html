@@ -1,0 +1,59 @@
+{% extends "layout.html" %}
+{% block title %}{{ 'Edit Expense' if expense else 'Add Expense' }} • SmartDairy{% endblock %}
+
+{% block content %}
+<h2 class="text-xl font-semibold text-slate-800 mb-2">
+  {{ 'Edit Expense' if expense else 'Add Expense' }}
+</h2>
+
+<form method="post"
+      class="bg-white border border-slate-200 rounded-lg p-4 shadow-sm space-y-3 text-xs">
+  <div class="grid md:grid-cols-2 gap-3">
+    <div>
+      <label class="block font-medium mb-1">Date *</label>
+      <input type="date" name="date" required
+             value="{{ default_date }}"
+             class="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+    </div>
+
+    <div>
+      <label class="block font-medium mb-1">Category *</label>
+      <select name="category" required
+              class="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+        <option value="">Select</option>
+        {% for c in base_categories %}
+          <option value="{{ c }}"
+                  {% if expense and expense.category == c %}selected{% endif %}>
+            {{ c }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div>
+      <label class="block font-medium mb-1">Amount (₹) *</label>
+      <input type="number" name="amount" required min="0"
+             value="{{ expense.amount if expense else '' }}"
+             placeholder="e.g. 8000"
+             class="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+    </div>
+  </div>
+
+  <div>
+    <label class="block font-medium mb-1">Description</label>
+    <textarea name="description" rows="3"
+              placeholder="Example: Grass & feed for 3 days, vaccination, diesel, etc."
+              class="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">{{ expense.description if expense else '' }}</textarea>
+  </div>
+
+  <div class="flex items-center gap-2">
+    <button type="submit"
+            class="rounded-md bg-emerald-600 px-4 py-2 text-xs font-medium text-white hover:bg-emerald-700">
+      {{ 'Update Expense' if expense else 'Save Expense' }}
+    </button>
+    <a href="{{ url_for('expense_list') }}" class="text-xs text-slate-600 hover:underline">
+      Cancel
+    </a>
+  </div>
+</form>
+{% endblock %}

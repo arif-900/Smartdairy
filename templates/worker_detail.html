@@ -1,0 +1,151 @@
+{% extends "layout.html" %}
+{% block title %}Worker {{ worker.id }} • SmartDairy{% endblock %}
+
+{% block content %}
+<div class="mb-3 flex items-center justify-between">
+  <div>
+    <h1 class="text-lg font-semibold text-slate-800">
+      Worker Details – W-{{ worker.id }}
+    </h1>
+    <p class="text-[11px] text-slate-500">
+      {{ worker.name }} • {{ worker.role or 'No role set' }}
+    </p>
+  </div>
+  <a href="{{ url_for('worker_list') }}"
+     class="text-[11px] text-slate-600 hover:underline">
+    ← Back to Workers
+  </a>
+</div>
+
+<div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm card-hover text-xs space-y-3">
+
+  <div class="grid md:grid-cols-2 gap-4">
+    <!-- Basic Info -->
+    <div class="space-y-2">
+      <h2 class="text-sm font-semibold text-slate-700 mb-1">Basic Info</h2>
+      <dl class="space-y-1">
+        <div class="flex justify-between">
+          <dt class="text-slate-500">ID</dt>
+          <dd class="font-medium text-slate-800">W-{{ worker.id }}</dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-slate-500">Name</dt>
+          <dd class="font-medium text-slate-800">{{ worker.name }}</dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-slate-500">Role</dt>
+          <dd class="font-medium text-slate-800">{{ worker.role or '-' }}</dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-slate-500">Status</dt>
+          <dd>
+            {% if worker.status == 'active' %}
+              <span class="badge badge-soft-green">Active</span>
+            {% else %}
+              <span class="badge badge-soft-slate">Left</span>
+            {% endif %}
+          </dd>
+        </div>
+      </dl>
+    </div>
+
+    <!-- Contact Info -->
+    <div class="space-y-2">
+      <h2 class="text-sm font-semibold text-slate-700 mb-1">Contact Info</h2>
+      <dl class="space-y-1">
+        <div class="flex justify-between">
+          <dt class="text-slate-500">Mobile</dt>
+          <dd class="font-medium text-slate-800">{{ worker.mobile }}</dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-slate-500">Alt Mobile</dt>
+          <dd class="font-medium text-slate-800">{{ worker.alt_mobile or '-' }}</dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-slate-500">Joining Date</dt>
+          <dd class="font-medium text-slate-800">
+            {% if worker.joining_date %}
+              {{ worker.joining_date.strftime("%d-%m-%Y") }}
+            {% else %}
+              -
+            {% endif %}
+          </dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+
+  <!-- Bank & Salary -->
+  <div class="grid md:grid-cols-2 gap-4 pt-3 border-t border-slate-100">
+    <div class="space-y-2">
+      <h2 class="text-sm font-semibold text-slate-700 mb-1">Bank Details</h2>
+      <dl class="space-y-1">
+        <div class="flex justify-between">
+          <dt class="text-slate-500">Bank Name</dt>
+          <dd class="font-medium text-slate-800">{{ worker.bank_name or '-' }}</dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-slate-500">Account No</dt>
+          <dd class="font-medium text-slate-800">{{ worker.account_number or '-' }}</dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-slate-500">IFSC</dt>
+          <dd class="font-medium text-slate-800">{{ worker.ifsc or '-' }}</dd>
+        </div>
+      </dl>
+    </div>
+
+    <div class="space-y-2">
+      <h2 class="text-sm font-semibold text-slate-700 mb-1">Salary Info</h2>
+      <dl class="space-y-1">
+        <div class="flex justify-between">
+          <dt class="text-slate-500">Salary / Month</dt>
+          <dd class="font-medium text-slate-800">
+            {% if worker.salary_per_month %}
+              ₹ {{ "{:,}".format(worker.salary_per_month) }}
+            {% else %}
+              Not set
+            {% endif %}
+          </dd>
+        </div>
+      </dl>
+      <p class="text-[11px] text-slate-500 mt-1">
+        Check <a href="{{ url_for('salary_list') }}" class="text-emerald-600 hover:underline">Salary Payments</a>
+        page for month-wise history.
+      </p>
+    </div>
+  </div>
+
+  <!-- Notes -->
+  <div class="pt-3 border-t border-slate-100">
+    <h2 class="text-sm font-semibold text-slate-700 mb-1">Notes</h2>
+    <p class="text-[11px] text-slate-600">
+      {% if worker.notes %}
+        {{ worker.notes }}
+      {% else %}
+        No notes added for this worker yet.
+      {% endif %}
+    </p>
+  </div>
+
+  <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+    <div class="text-[11px] text-slate-500">
+      Last updated worker record in your SmartDairy system.
+    </div>
+    <div class="flex items-center gap-2 text-[11px]">
+      <a href="{{ url_for('worker_edit', worker_id=worker.id) }}"
+         class="text-sky-600 hover:underline">Edit</a>
+
+      {% if session.get('role') == 'admin' %}
+        <form action="{{ url_for('worker_delete', worker_id=worker.id) }}"
+              method="post"
+              onsubmit="return confirm('Delete this worker record?');">
+          <button type="submit" class="text-red-600 hover:underline">
+            Delete
+          </button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

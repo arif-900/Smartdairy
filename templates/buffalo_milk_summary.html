@@ -1,0 +1,114 @@
+{% extends "layout.html" %}
+{% block title %}Milk Summary • B-{{ buffalo.id }} {{ buffalo.tag_name }}{% endblock %}
+
+{% block content %}
+<div class="space-y-4">
+
+  <!-- Header + Back -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-base font-semibold text-slate-800">
+        Milk Summary – B-{{ buffalo.id }} • {{ buffalo.tag_name }}
+      </h1>
+      <p class="text-[11px] text-slate-500">
+        {{ buffalo.animal_type|capitalize if buffalo.animal_type else 'Buffalo' }}
+        • Status:
+        <span class="font-medium uppercase">{{ buffalo.status }}</span>
+      </p>
+    </div>
+    <a
+      href="{{ url_for('buffalo_detail', buffalo_id=buffalo.id) }}"
+      class="inline-flex items-center rounded-md border border-slate-300 px-3 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50">
+      ← Back to Buffalo Detail
+    </a>
+  </div>
+
+  <!-- Summary cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
+    <div class="rounded-xl border border-slate-200 bg-white px-4 py-3">
+      <div class="text-[11px] text-slate-500 mb-1">First Record</div>
+      <div class="text-sm font-semibold text-slate-800">
+        {% if first_date %}
+          {{ first_date.strftime("%d-%m-%Y") }}
+        {% else %}
+          -
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="rounded-xl border border-slate-200 bg-white px-4 py-3">
+      <div class="text-[11px] text-slate-500 mb-1">Last Record</div>
+      <div class="text-sm font-semibold text-slate-800">
+        {% if last_date %}
+          {{ last_date.strftime("%d-%m-%Y") }}
+        {% else %}
+          -
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="rounded-xl border border-slate-200 bg-white px-4 py-3">
+      <div class="text-[11px] text-slate-500 mb-1">Total Milk</div>
+      <div class="text-sm font-semibold text-slate-800">
+        {{ "%.2f"|format(total_litres or 0) }} L
+      </div>
+    </div>
+
+    <div class="rounded-xl border border-slate-200 bg-white px-4 py-3">
+      <div class="text-[11px] text-slate-500 mb-1">Average per Recorded Day</div>
+      <div class="text-sm font-semibold text-slate-800">
+        {{ "%.2f"|format(avg_per_day or 0) }} L
+      </div>
+    </div>
+  </div>
+
+  <div class="text-[11px] text-slate-500">
+    Days with milk records: <span class="font-semibold text-slate-800">{{ days_count }}</span>
+  </div>
+
+  <!-- Detailed table -->
+  <div class="overflow-x-auto text-xs">
+    <table class="min-w-full border border-slate-200 bg-white rounded-lg overflow-hidden">
+      <thead class="bg-slate-50 text-[11px] text-slate-600">
+        <tr>
+          <th class="px-3 py-2 text-left border-b border-slate-200">Date</th>
+          <th class="px-3 py-2 text-right border-b border-slate-200">Morning (L)</th>
+          <th class="px-3 py-2 text-right border-b border-slate-200">Evening (L)</th>
+          <th class="px-3 py-2 text-right border-b border-slate-200">Total (L)</th>
+          <th class="px-3 py-2 text-left border-b border-slate-200">Notes</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        {% if records %}
+          {% for r in records %}
+            <tr>
+              <td class="px-3 py-2">
+                {{ r.date.strftime("%d-%m-%Y") }}
+              </td>
+              <td class="px-3 py-2 text-right">
+                {{ "%.2f"|format(r.morning_litres or 0) }}
+              </td>
+              <td class="px-3 py-2 text-right">
+                {{ "%.2f"|format(r.evening_litres or 0) }}
+              </td>
+              <td class="px-3 py-2 text-right font-semibold text-slate-800">
+                {{ "%.2f"|format((r.morning_litres or 0) + (r.evening_litres or 0)) }}
+              </td>
+              <td class="px-3 py-2 text-[11px] text-slate-600">
+                {{ r.notes or "" }}
+              </td>
+            </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="5" class="px-3 py-4 text-center text-[11px] text-slate-500">
+              No milk records available for this buffalo.
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+{% endblock %}
