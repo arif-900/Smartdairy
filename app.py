@@ -9,6 +9,8 @@ from flask import (
     Response,
     send_file,
 )
+from dotenv import load_dotenv
+load_dotenv()
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, date, timedelta
 from sqlalchemy import func
